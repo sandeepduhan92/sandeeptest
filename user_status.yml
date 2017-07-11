@@ -1,0 +1,15 @@
+---
+ - hosts: test
+   sudo: yes
+   vars: 
+      name: 'sandeep'
+   tasks:
+       - name: ensure User present on server
+         shell: command cat /etc/passwd | grep "{{name}}" | awk '-F:' '{print $1}'
+         register: out
+
+       - debug: var=out.stdout_lines
+       - name: ensure user into groups
+         shell: command cat /etc/group |grep "{{name}}" | awk '-F:' '{print $1}'
+         register: out
+       - debug: var=out.stdout_lines 
