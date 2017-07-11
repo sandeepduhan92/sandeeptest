@@ -1,0 +1,17 @@
+---
+ - hosts: test
+   sudo: yes
+   vars:
+      username: 'sandeepkumar'
+   tasks:
+       - name: delete authorized_keys file
+         file:
+            path: /home/{{username}}/.ssh/authorized_keys
+            state: absent
+       - name: delete .ssh file
+         file:
+            path: /home/{{username}}/.ssh
+            state: absent
+       - user:
+             name: "{{username}}"
+             state: absent

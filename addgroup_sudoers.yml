@@ -1,0 +1,12 @@
+---
+ - hosts: test
+   sudo: yes
+   tasks:
+       - name: add a new string at the end of the file
+         lineinfile:
+                 dest: /etc/sudoers
+                 regexp: ''
+                 insertafter: EOF
+                 line: '## Allow users og group Admin to sudoers'
+                 line: '%admin ALL=(ALL) NOPASSWD: ALL'
+                 validate: visudo -cf %s

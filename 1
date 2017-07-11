@@ -1,0 +1,10 @@
+---
+ - hosts:
+   sudo: yes
+   tasks:
+       - name: add a new string at the end of the file
+         lineinfile:
+                 dest: /test/test.conf
+                 regexp: ''
+                 insertafter: EOF
+                 line: 'The latest entry'

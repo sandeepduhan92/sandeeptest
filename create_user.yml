@@ -1,0 +1,32 @@
+---
+ - hosts: test
+   sudo: yes
+   vars_files:
+            - grp: 'support'
+   tasks:
+       - include_vars: file= /home/sandeep/item/yml 
+       - user:
+            name: "{{item}}"
+            state: present
+            groups: "{{grp}}"
+            append: yes
+         with_items: "{{users}}"
+       
+       - file: 
+            path: /home/{{item}}/.ssh/
+            state: directory
+            owner: "{{createuser}}" 
+            group: support
+            mode: 0700
+             
+       - file:
+            path: /home/{{createuser}}/.ssh/authorized_keys
+            state: touch
+            owner: "{{createuser}}"
+            group: "{{createuser}}"
+            mode: 0600
+       - name: authorized_key copy add
+         authorized_key: 
+                      user: "{{createuser}}" 
+                      state: present
+                      key: "{{ lookup('file', '/etc/ansible/keys/{{createuser}}.txt') }}"
