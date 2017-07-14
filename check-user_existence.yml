@@ -1,0 +1,14 @@
+---
+ - hosts: test
+   become: yes
+   tasks:
+       - include_vars: file= /tmp/sandeep_github/user_list/user-check-list.yml
+       - name: ensure User present on server
+         shell: command cat /etc/passwd | grep "{{item}}" | awk '-F:' '{print $1}'
+
+         with_items: "{{support}}"
+         register: out 
+       - debug: msg=out.stdout_lines
+         
+         with_items: "{{support}}"
+          

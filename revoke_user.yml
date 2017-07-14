@@ -1,20 +1,20 @@
 ---
- - hosts: N.Virginia
+ - hosts: test
    sudo: yes
-   vars:
-      username: 'charanjeet.sandhu'
    tasks:
-       - name: deleting authorized_keys file for user "{{username}}"
+       - include_vars: file= /tmp/sandeep_github/user_list/user-deletion-list.yml 
+       - name: deleting authorized_keys file for user "{{item}}"
          file:
-            path: /home/{{username}}/.ssh/authorized_keys
+            path: /home/{{item}}/.ssh/authorized_keys
             state: absent
-        
-       - name: deleting .ssh directory for user "{{username}}"
+         with_items: "{{support}}"
+       - name: deleting .ssh directory for user "{{item}}"
          file:
-            path: /home/{{username}}/.ssh
+            path: /home/{{item}}/.ssh
             state: absent
-
-       - name: Deleteing user "{{username}}"
+         with_items: "{{support}}"
+       - name: Deleteing user "{{items}}"
          user:
-            name: "{{username}}"
+            name: "{{item}}"
             state: absent
+         with_items: "{{support}}"
