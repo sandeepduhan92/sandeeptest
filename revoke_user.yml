@@ -1,14 +1,14 @@
 ---
- - hosts: test
+ - hosts: N.Virginia
    sudo: yes
    vars:
-      username: 'sandeep3'
+      username: 'charanjeet.sandhu'
    tasks:
        - name: deleting authorized_keys file for user "{{username}}"
          file:
             path: /home/{{username}}/.ssh/authorized_keys
             state: absent
-
+        
        - name: deleting .ssh directory for user "{{username}}"
          file:
             path: /home/{{username}}/.ssh

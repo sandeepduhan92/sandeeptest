@@ -28,3 +28,9 @@
                       state: present
                       key: "{{ lookup('file', '/etc/ansible/keys/{{item}}.txt') }}"
          with_items: "{{support}}"
+       - name: adding group to support 
+         user:
+            name: "{{item}}"
+            groups: support,admin
+            append: yes 
+         with_items: "{{support}}"
