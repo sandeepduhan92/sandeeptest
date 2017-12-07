@@ -1,0 +1,8 @@
+---
+ - hosts: 54.169.166.121
+   become_user: yes
+   tasks:
+       - name: Enable root ssh for provisioning
+         replace: dest=/root/.ssh/authorized_keys 
+                  regexp="#ssh" 
+                  replace="ssh" 
