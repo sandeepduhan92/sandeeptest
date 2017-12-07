@@ -1,0 +1,48 @@
+---
+ - hosts: 54.169.166.121
+   sudo: yes
+   tasks:
+      - name: check user
+        shell: command  awk '-F:' '{print $1}' /etc/passwd | grep -iP 'centos|ec2-user'
+        register: out
+        ignore_errors: True
+      - debug: msg="{{out.rc}}"
+      - name: create user 
+        user: name=cloud  state=present
+        when: out.rc == 1
+        register: user_out
+      - debug: msg="{{user_out.changed}}"
+      - name: create directory
+        file:  
+           path: /home/cloud/.ssh 
+           state: directory 
+           owner: cloud
+           group: cloud 
+           mode: 0700
+        when: user_out.changed =='true'
+        register: dir_out
+      - debug: msg="{{dir_out.changed}}"
+      - name: create file
+        file: 
+           path: /home/cloud/.ssh/authorized_keys 
+           state: touch 
+           owner: cloud
+           group: cloud 
+           mode: 0600
+        when: dir_out.changed =='true'
+        register: auth_out
+      - debug: msg="{{auth_out.changed}}" 
+      - name: authorized_key copy add
+        authorized_key:
+                     user: cloud
+                     state: present
+                     key: "{{ lookup('file', '/etc/ansible/keys/cloud.txt') }}"
+        when: auth_out.changed =='true'
+        register: key_out
+      - debug: msg="{{key_out.changed}}"
+      - name: adding group to support 
+        user:
+           name: cloud
+           groups: admin
+           append: yes 
+        when: key_out.changed =='true' 
