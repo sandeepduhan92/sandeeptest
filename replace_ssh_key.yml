@@ -1,0 +1,27 @@
+---
+ - hosts: 192.168.134.138
+   user: root
+   tasks:
+       - include_vars: file= /etc/ansible/ssh.yml 
+       - name: copy ssh key file and replace
+         authorized_key:
+                      user: "{{item}}"
+                      state: present
+                      key: "{{ lookup('file', '/etc/ansible/keys/{{item}}.txt') }}"
+         with_items: "{{support}}"
+       - name: set permissions
+         file:  
+            path: /home/{{item}}/.ssh 
+            state: directory 
+            owner: "{{item}}"
+            group: "{{item}}" 
+            mode: 0700
+         with_items: "{{support}}"
+       - name: set permissions
+         file: 
+            path: /home/{{item}}/.ssh/authorized_keys 
+            state: touch 
+            owner: "{{item}}" 
+            group: "{{item}}" 
+            mode: 0600
+         with_items: "{{support}}"
