@@ -1,0 +1,99 @@
+---
+ - hosts: all
+   remote_user: ec2-user
+   ignore_errors: True
+   tasks:
+       - name: select username from DB
+         shell: command  mysql --user=root --password=root ssh_gw --host=localhost --execute="SELECT username from users where USERGROUP='support' order by username" >/etc/ansible/list/support_user.yml
+         register: mysql_out
+       - debug: msg="{{mysql_out.rc}}"
+       
+       - name: formatting of mysql_users
+         shell: command sed -i 's/^/    - { name':' /g' /etc/ansible/list/support_user.yml
+         register: format1_out
+         when: mysql_out.rc==0
+       - debug: msg="{{format1_out.rc}}"
+      
+       - name: formatting of mysql_users2
+         shell: command sed -i 's/$/ , groups':' support}/g' /etc/ansible/list/support_user.yml
+         register: format1_out2
+         when: format1_out.rc==0
+       - debug: msg="{{format1_out2.rc}}"
+
+ 
+       - name: formatting2         
+         shell: command sed -i '1i ---' /etc/ansible/list/support_user.yml
+         register: format2_out
+         when: format1_out2.rc==0
+       - debug: msg="{{format2_out.rc}}"
+      
+       - name: formatting3
+         shell: command sed -i '2i support:' /etc/ansible/list/support_user.yml
+         when: format2_out.rc==0
+
+
+
+
+
+
+       - name: select engg username from DB
+         shell: command  mysql --user=root --password=root ssh_gw --host=localhost --execute="SELECT username from users where USERGROUP='engg' order by username" >/etc/ansible/list/engg_user.yml
+         register: mysql_engg_out
+       - debug: msg="{{mysql_engg_out.rc}}"
+
+       - name: formatting of mysql_engg_users
+         shell: command sed -i 's/^/    - { name':' /g' /etc/ansible/list/engg_user.yml
+         register: format1_engg_out
+         when: mysql_engg_out.rc==0
+       - debug: msg="{{format1_engg_out.rc}}"
+
+       - name: formatting of mysql_engg_users
+         shell: command sed -i 's/$/ , groups':' engg}/g' /etc/ansible/list/engg_user.yml
+         register: format2_engg_out
+         when: format1_engg_out.rc==0
+       - debug: msg="{{format2_engg_out.rc}}"
+
+
+       - name: formatting_engg_2
+         shell: command sed -i '1i ---' /etc/ansible/list/engg_user.yml
+         register: format3_engg_out
+         when: format2_engg_out.rc==0
+       - debug: msg="{{format3_engg_out.rc}}"
+
+       - name: formatting_engg_3
+         shell: command sed -i '2i engg:' /etc/ansible/list/engg_user.yml
+         when: format3_engg_out.rc==0
+
+
+
+
+
+
+       - name: select Deployment username from DB
+         shell: command  mysql --user=root --password=root ssh_gw --host=localhost --execute="SELECT username from users where USERGROUP='deployment' order by username" >/etc/ansible/list/deployment_user.yml
+         register: mysql_deployment_out
+       - debug: msg="{{mysql_deployment_out.rc}}"
+
+       - name: formatting of mysql_deployment_users
+         shell: command sed -i 's/^/    - { name':' /g' /etc/ansible/list/deployment_user.yml
+         register: format1_deployment_out
+         when: mysql_deployment_out.rc==0
+       - debug: msg="{{format1_deployment_out.rc}}"
+
+       - name: formatting-DEPLOYMENT_2
+         shell: command sed -i 's/$/ , groups':' deployment}/g' /etc/ansible/list/deployment_user.yml
+         register: format2_deployment_out
+         when: format1_deployment_out.rc==0
+       - debug: msg="{{format2_deployment_out.rc}}"
+
+
+       - name: formatting_deployment_3
+         shell: command sed -i '1i ---' /etc/ansible/list/deployment_user.yml
+         register: format3_deployment_out
+         when: format2_deployment_out.rc==0
+       - debug: msg="{{format3_deployment_out.rc}}"
+
+       - name: formatting_deployment_4
+         shell: command sed -i '2i deployment:' /etc/ansible/list/deployment_user.yml
+         when: format3_deployment_out.rc==0
+
