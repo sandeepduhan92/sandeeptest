@@ -1,0 +1,62 @@
+---
+ - hosts: all 
+   remote_user: ec2-user
+   ignore_errors: True
+   tasks:
+
+       - name: check user exist or not
+         shell: command  mysql --user=root --password=root ssh_gw --host=localhost -Ne "SELECT username from users where username='{{username}}' and USERGROUP='{{groupname}}' order by username"
+         register: instance_out
+
+       - name: Check if user already provisoned or not
+         shell: command  mysql --user=root --password=root ssh_gw --host=localhost -Ne "select username from users where id in (select user_id from access where instance_id in (select id from instances where private_ip='{{ip}}')) and username='{{username}}'"
+         register: mysql_out
+         when: instance_out.stdout != ""
+
+       - name: Create group for users 
+         group:
+             name: '{{groupname}}'
+             state: present
+         when: mysql_out.stdout != ""
+
+       - name: Check if user exist or not
+         shell: command cat /etc/passwd | grep "{{username}}" | awk '-F:' '{print $1}'
+         register: user_out
+
+       - name: User Provisoning
+         user: 
+            name: '{{username}}'
+            groups: '{{groupname}}'
+            state: present
+         register: provision_out
+         when: user_out.stdout == ""
+
+       - name: create ssh directory
+         file:  
+            path: /home/{{username}}/.ssh 
+            state: directory 
+            owner: '{{username}}'
+            group: '{{groupname}}'
+            mode: 0700
+         when: user_out.changed =='true'
+         register: dir_out
+       - debug: msg="{{dir_out.changed}}"
+       - name: create file
+         file: 
+            path: /home/{{username}}/.ssh/authorized_keys 
+            state: touch 
+            owner: '{{username}}'
+            group: '{{groupname}}'
+            mode: 0600
+         when: dir_out.changed =='true'
+         register: auth_out
+       - debug: msg="{{auth_out.changed}}" 
+       - name: authorized_key copy add
+         authorized_key:
+                      user: '{{username}}'
+                      state: present
+                      key: "{{ lookup('file', '/etc/ansible/keys/{{username}}.txt') }}"
+         when: auth_out.changed =='true'
+         register: key_out
+       - debug: msg="{{key_out.changed}}"
+       
