@@ -1,0 +1,37 @@
+---
+ - hosts: all
+   remote_user: ec2-user
+   sudo: yes
+   tasks:
+       - name: check if user exist or not
+         shell: command mysql --user=root --password=root ssh_gw --host=localhost -Ne "select sudo_access from ACL where user_id in (select id from users where username='{{username}}' and USERGROUP='{{groupname}}' and private_ip='{{ip}}')" 
+         register: sudo_out
+       - debug: msg='{{sudo_out}}'
+      
+       - name: check if u2admin exist or not
+         shell: command cat  /etc/group | grep "u2admin" | awk '-F:' '{print $1}'
+         register: u2admin_out
+       - debug: msg="{{u2admin_out}}"
+
+       - name: craete u2admin group
+         group:
+              name: u2admin
+              state: present
+         when: u2admin_out.stdout != "u2admin"
+         register: group_out
+       - debug: msg="{{group_out}}"
+
+       - name: check2 if u2admin exist or not
+         shell: command cat  /etc/group | grep "u2admin" | awk '-F:' '{print $1}'
+         register: u2admin2_out
+       - debug: msg="{{u2admin2_out}}"
+
+       - name:  add '{{username}}' to sudores
+         user:
+            name: '{{username}}'
+            groups: u2admin
+            append: yes
+            state: present
+         when: u2admin2_out.stdout == "u2admin"
+         register: access_out
+       - debug: msg="{{access_out}}"
