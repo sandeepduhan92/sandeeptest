@@ -7,6 +7,9 @@
          shell: command mysql -uroot -proot ssh_gw -Ne "select private_ip,zone from instances where aws_region not in ('N. California','Oregon') order by zone" > /etc/ansible/list/hosts 
          register: hosts_out
        - debug: msg="{{hosts_out}}"
+
+       - name: inventory for Public Ip regions
+         shell: command mysql -uroot -proot ssh_gw -Ne "select public_ip,zone from instances where aws_region in ('N. California','Oregon') order by zone" >> /etc/ansible/list/hosts
   
        - name: prepare hosts Inventory
          shell: command sed -i 's/\t/ /g' /etc/ansible/list/hosts
