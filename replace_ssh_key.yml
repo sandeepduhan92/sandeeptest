@@ -7,6 +7,7 @@
          authorized_key:
                       user: "{{item}}"
                       state: present
+                      exclusive: True
                       key: "{{ lookup('file', '/etc/ansible/keys/{{item}}.txt') }}"
          with_items: "{{support}}"
        - name: set permissions
